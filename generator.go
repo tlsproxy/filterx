@@ -82,6 +82,15 @@ func (cuf {{.StructName}}Filterx) GormHelper(db *gorm.DB) *gorm.DB {
 		if f, ok := cuf.{{.Name}}.Filter().GetIn(); ok {
 			db = db.Where("{{.FilterxTag}} IN ?", f.Values)
 		}
+
+		if f, ok := cuf.{{.Name}}.Filter().GetNIn(); ok {
+			db = db.Where("{{.FilterxTag}} NOT IN ?", f.Values)
+		}
+
+		if f, ok := cuf.{{.Name}}.Filter().GetLike(); ok {
+			db = db.Where("{{.FilterxTag}} like ?", f.Pattern)
+		}
+
 	{{- end}}
 	return db
 }

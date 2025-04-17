@@ -169,7 +169,7 @@ type Filter[T constraints] struct {
 
 // GetNIn 获取 NIn 谓词
 func (f Filter[T]) GetNIn() (NIn[T], bool) {
-	if f.rangePtr != nil {
+	if f.ninPtr != nil {
 		return *f.ninPtr, true
 	}
 	return NIn[T]{}, false
@@ -185,7 +185,7 @@ func (f Filter[T]) GetRange() (Range[T], bool) {
 
 // GetLike 获取 like 谓词
 func (f Filter[T]) GetLike() (Like[T], bool) {
-	if f.rangePtr != nil {
+	if f.likePtr != nil {
 		return *f.likePtr, true
 	}
 	return Like[T]{}, false
