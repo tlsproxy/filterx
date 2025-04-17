@@ -27,6 +27,20 @@ func (r Range[T]) MarshalJSON() ([]byte, error) {
 	}{r.Max, r.Min}})
 }
 
+// Like 表示匹配谓词
+type Like[T constraints] struct {
+	Pattern T `json:"pattern"`
+}
+
+func (e Like[T]) Filter() Filter[T] {
+	return Filter[T]{likePtr: &e}
+}
+
+// MarshalJSON 实现 json.Marshaler 接口
+func (e Like[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]T{"like": e.Pattern})
+}
+
 // EQ 表示相等谓词
 type EQ[T constraints] struct {
 	Value T `json:"value"`
@@ -97,6 +111,20 @@ func (i In[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string][]T{"in": i.Values})
 }
 
+// NIn 表示不包含在集合中的谓词
+type NIn[T constraints] struct {
+	Values []T `json:"values"`
+}
+
+func (i NIn[T]) Filter() Filter[T] {
+	return Filter[T]{ninPtr: &i}
+}
+
+// MarshalJSON 实现 json.Marshaler 接口
+func (i NIn[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string][]T{"nin": i.Values})
+}
+
 // GE 表示大于等于谓词
 type GE[T constraints] struct {
 	Value T
@@ -128,13 +156,23 @@ func (l LE[T]) MarshalJSON() ([]byte, error) {
 // Filter 包装不同的谓词类型
 type Filter[T constraints] struct {
 	rangePtr *Range[T]
+	likePtr  *Like[T]
 	eqPtr    *EQ[T]
 	ltPtr    *LT[T]
 	gtPtr    *GT[T]
 	inPtr    *In[T]
+	ninPtr   *NIn[T]
 	gePtr    *GE[T]
 	lePtr    *LE[T]
 	neqPtr   *NEQ[T]
+}
+
+// GetNIn 获取 NIn 谓词
+func (f Filter[T]) GetNIn() (NIn[T], bool) {
+	if f.rangePtr != nil {
+		return *f.ninPtr, true
+	}
+	return NIn[T]{}, false
 }
 
 // GetRange 获取 Range 谓词
@@ -143,6 +181,14 @@ func (f Filter[T]) GetRange() (Range[T], bool) {
 		return *f.rangePtr, true
 	}
 	return Range[T]{}, false
+}
+
+// GetLike 获取 like 谓词
+func (f Filter[T]) GetLike() (Like[T], bool) {
+	if f.rangePtr != nil {
+		return *f.likePtr, true
+	}
+	return Like[T]{}, false
 }
 
 // GetEQ 获取 EQ 谓词
