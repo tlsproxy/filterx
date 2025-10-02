@@ -172,6 +172,35 @@ func (gen *Generator) Generate(in ...interface{}) error {
 	return nil
 }
 
+// scanStruct 递归扫描结构体字段，包括匿名嵌套结构
+func (gen *Generator) scanStruct(t reflect.Type) []FieldInfo {
+	var fields []FieldInfo
+
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+
+		// 忽略 unexported 字段
+		if f.PkgPath != "" {
+			continue
+		}
+
+		// 匿名嵌套结构，且是 struct 类型，递归展开
+		if f.Anonymous && f.Type.Kind() == reflect.Struct {
+			nestedFields := gen.scanStruct(f.Type)
+			fields = append(fields, nestedFields...)
+		} else {
+			fields = append(fields, FieldInfo{
+				Name:       f.Name,
+				Type:       f.Type.String(),
+				JsonTag:    f.Tag.Get("json"),
+				FilterxTag: f.Tag.Get("filterx"),
+			})
+		}
+	}
+
+	return fields
+}
+
 func (gen *Generator) generate(in interface{}, packageName string) error {
 	inputType := reflect.TypeOf(in)
 	if inputType.Kind() != reflect.Struct {
@@ -184,16 +213,7 @@ func (gen *Generator) generate(in interface{}, packageName string) error {
 		return fmt.Errorf("anonymous structs are not supported")
 	}
 
-	var structFields []FieldInfo
-	for i := 0; i < inputType.NumField(); i++ {
-		field := inputType.Field(i)
-		structFields = append(structFields, FieldInfo{
-			Name:       field.Name,
-			Type:       field.Type.String(),
-			JsonTag:    field.Tag.Get("json"),
-			FilterxTag: field.Tag.Get("filterx"),
-		})
-	}
+	structFields := gen.scanStruct(inputType)
 
 	if len(structFields) == 0 {
 		return fmt.Errorf("struct %s not found or has no fields", structName)
