@@ -63,7 +63,7 @@ func (cuf {{.StructName}}Filterx) GormHelper(db *gorm.DB) *gorm.DB {
 
 		if cuf.{{.Name}} != nil {
 			if f, ok := cuf.{{.Name}}.Filter().GetEQ(); ok {
-				db = db.Where("{{.FilterxTag}} >= ?", f.Value)
+				db = db.Where("{{.FilterxTag}} = ?", f.Value)
 			}
 		}
 
