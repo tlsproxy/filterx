@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
+
+	"golang.org/x/tools/imports"
 )
 
 type Generator struct {
@@ -35,7 +37,7 @@ package {{.PackageName}}
 
 import (
 	{{- range .FilterxImport}}
-		_ "{{.}}"
+		"{{.}}"
 	{{- end}}
 )
 
@@ -281,8 +283,13 @@ func (gen *Generator) genFile(structName string, data TemplateData, temp string,
 		return fmt.Errorf("failed to create output directory: %v", err)
 	}
 
+	format, err := imports.Process(gen.o.Output, buf.Bytes(), nil)
+	if err != nil {
+		return fmt.Errorf("failed to format generated code: %v", err)
+	}
+
 	// 写入输出文件
-	err = os.WriteFile(fmt.Sprintf("%s/%s_%s_gen.go", gen.o.Output, strings.ToLower(structName), suffix), buf.Bytes(), 0644)
+	err = os.WriteFile(fmt.Sprintf("%s/%s_%s_gen.go", gen.o.Output, strings.ToLower(structName), suffix), format, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write output file: %v", err)
 	}
