@@ -204,9 +204,18 @@ func (gen *Generator) scanStruct(t reflect.Type) []FieldInfo {
 		}
 
 		// 匿名嵌套结构，且是 struct 类型，递归展开
-		if f.Anonymous && f.Type.Kind() == reflect.Struct {
-			nestedFields := gen.scanStruct(f.Type)
-			fields = append(fields, nestedFields...)
+		if f.Anonymous {
+			if f.Type.Kind() == reflect.Struct {
+				nestedFields := gen.scanStruct(f.Type)
+				fields = append(fields, nestedFields...)
+			} else if f.Type.Kind() == reflect.Pointer || f.Type.Kind() == reflect.Ptr {
+				elem := f.Type.Elem()
+				if elem.Kind() == reflect.Struct {
+					nestedFields := gen.scanStruct(elem)
+					fields = append(fields, nestedFields...)
+				}
+			}
+
 		} else {
 			fields = append(fields, FieldInfo{
 				Name:       f.Name,

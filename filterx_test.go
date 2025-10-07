@@ -4,14 +4,18 @@ import (
 	"testing"
 )
 
-type App struct {
-	ID uint `json:"id" filterx:"id"`
+type B struct {
+	Field3 int `json:"field3" filterx:"field3"`
+}
+
+type A struct {
+	Field2 int `json:"field2" filterx:"field2"`
+	*B
 }
 
 type Custom struct {
-	App
-	Name string `json:"name" filterx:"name"`
-	Age  int    `json:"age" filterx:"age"`
+	Field1 int `json:"field1" filterx:"field1"`
+	A
 }
 
 func TestNewGeneratorOptions(t *testing.T) {
