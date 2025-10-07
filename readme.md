@@ -38,7 +38,7 @@ package main
 
 import (
 	"encoding/json"
-	"filtert/filter"
+	"filter/filter"
 	"github.com/tlsproxy/filterx"
 )
 

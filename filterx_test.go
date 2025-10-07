@@ -18,7 +18,7 @@ func TestNewGeneratorOptions(t *testing.T) {
 	g := NewGeneratorOptions(
 		WithOutput("./output"),
 		WithGormHelper(),
-		//WithPackages([]string{""}),
+		WithPackages([]string{"time"}),
 	)
 	err := g.Generate(Custom{})
 	if err != nil {
