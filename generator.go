@@ -35,7 +35,7 @@ package {{.PackageName}}
 
 import (
 	{{- range .FilterxImport}}
-		"{{.}}"
+		_ "{{.}}"
 	{{- end}}
 )
 
