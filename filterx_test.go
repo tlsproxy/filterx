@@ -18,13 +18,17 @@ type Custom struct {
 	A
 }
 
+type Custom1 struct {
+	Field1 int `json:"field1" filterx:"field1"`
+}
+
 func TestNewGeneratorOptions(t *testing.T) {
 	g := NewGeneratorOptions(
 		WithOutput("./output"),
 		WithGormHelper(),
 		WithPackages([]string{"time"}),
 	)
-	err := g.Generate(Custom{})
+	err := g.Generate(Custom{}, Custom1{})
 	if err != nil {
 		t.Fail()
 	}
